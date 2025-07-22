@@ -5,16 +5,15 @@ services:
     image: wallabag/wallabag
     container_name: wallabag
     environment:
-      - MYSQL_ROOT_PASSWORD=wallabag
       - SYMFONY__ENV__DATABASE_DRIVER=pdo_mysql
       - SYMFONY__ENV__DATABASE_HOST=db
       - SYMFONY__ENV__DATABASE_PORT=3306
       - SYMFONY__ENV__DATABASE_NAME=wallabag
       - SYMFONY__ENV__DATABASE_USER=wallabag
-      - SYMFONY__ENV__DATABASE_PASSWORD=wallabag
-      - SYMFONY__ENV__DOMAIN_NAME=https://your-app-name.onrender.com
+      - SYMFONY__ENV__DATABASE_PASSWORD=${MYSQL_PASSWORD}
+      - SYMFONY__ENV__DOMAIN_NAME=${DOMAIN_NAME}
     ports:
-      - "7780:80"
+      - "80:80"
     depends_on:
       - db
     command: >
@@ -23,12 +22,18 @@ services:
         php bin/console fos:user:create admin admin@example.com password123 --env=prod --no-interaction &&
         php bin/console fos:user:promote admin --env=prod &&
         php-fpm"
+    # command: >
+    #   bash -c "
+    #     php bin/console wallabag:install --env=prod --no-interaction &&
+    #     php bin/console fos:user:create $WALLABAG_USER $WALLABAG_EMAIL $WALLABAG_PASSWORD --env=prod --no-interaction &&
+    #     php bin/console fos:user:promote $WALLABAG_USER --env=prod &&
+    #     php-fpm"
   
   db:
     image: mariadb
     container_name: wallabag-db
     environment:
-      - MYSQL_ROOT_PASSWORD=wallabag
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=wallabag
       - MYSQL_USER=wallabag
-      - MYSQL_PASSWORD=wallabag
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
